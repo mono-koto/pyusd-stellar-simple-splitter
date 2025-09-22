@@ -13,16 +13,34 @@ impl SimpleSplitter {
     pub fn init(env: Env, token: Address, recipients: Vec<Address>, shares: Vec<u32>) {
         assert!(recipients.len() == shares.len(), "length mismatch");
         // persist token, recipients, shares in env storage
-        env.storage().instance().set(&symbol_short!("token"), &token);
-        env.storage().instance().set(&symbol_short!("recips"), &recipients);
-        env.storage().instance().set(&symbol_short!("shares"), &shares);
+        env.storage()
+            .instance()
+            .set(&symbol_short!("token"), &token);
+        env.storage()
+            .instance()
+            .set(&symbol_short!("recips"), &recipients);
+        env.storage()
+            .instance()
+            .set(&symbol_short!("shares"), &shares);
         env.storage().instance().extend_ttl(5000, 5000);
     }
 
     pub fn distribute(env: Env) {
-        let token: Address = env.storage().instance().get(&symbol_short!("token")).unwrap();
-        let recipients: Vec<Address> = env.storage().instance().get(&symbol_short!("recips")).unwrap();
-        let shares: Vec<u32> = env.storage().instance().get(&symbol_short!("shares")).unwrap();
+        let token: Address = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("token"))
+            .unwrap();
+        let recipients: Vec<Address> = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("recips"))
+            .unwrap();
+        let shares: Vec<u32> = env
+            .storage()
+            .instance()
+            .get(&symbol_short!("shares"))
+            .unwrap();
 
         let sac = soroban_sdk::token::Client::new(&env, &token);
 
@@ -39,9 +57,18 @@ impl SimpleSplitter {
 
     pub fn get_config(env: Env) -> (Address, Vec<Address>, Vec<u32>) {
         (
-            env.storage().instance().get(&symbol_short!("token")).unwrap(),
-            env.storage().instance().get(&symbol_short!("recips")).unwrap(),
-            env.storage().instance().get(&symbol_short!("shares")).unwrap(),
+            env.storage()
+                .instance()
+                .get(&symbol_short!("token"))
+                .unwrap(),
+            env.storage()
+                .instance()
+                .get(&symbol_short!("recips"))
+                .unwrap(),
+            env.storage()
+                .instance()
+                .get(&symbol_short!("shares"))
+                .unwrap(),
         )
     }
 }
