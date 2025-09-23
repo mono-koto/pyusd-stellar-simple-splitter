@@ -17,7 +17,7 @@ fn create_factory(env: &Env) -> (Address, SimpleSplitterFactoryClient<'_>) {
 
 fn create_dummy_wasm_hash(env: &Env) -> BytesN<32> {
     // For testing purposes, create a dummy hash
-    let dummy_bytes = soroban_sdk::Bytes::from_slice(&env, b"dummy_wasm");
+    let dummy_bytes = soroban_sdk::Bytes::from_slice(env, b"dummy_wasm");
     env.crypto().sha256(&dummy_bytes).into()
 }
 
