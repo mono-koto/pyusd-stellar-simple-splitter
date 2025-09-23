@@ -10,6 +10,14 @@ build:
 test:
     cargo test --all
 
+clippy:
+    cargo clippy --all -- -D warnings
+
+fmt:
+    cargo fmt --all -- --check
+
+check: build test clippy fmt
+
 # Deploy splitter contract (uses .env for network and private key)
 deploy-splitter:
     #!/bin/bash
@@ -24,8 +32,8 @@ deploy-factory splitter_wasm_hash:
     echo "Deploying Factory to $STELLAR_NETWORK..."
     FACTORY_ID=$(stellar contract deploy --network $STELLAR_NETWORK --source $PRIVATE_KEY --wasm target/wasm32-unknown-unknown/release/simple_splitter_factory.optimized.wasm)
     echo "Factory deployed: $FACTORY_ID"
-    stellar contract invoke --network $STELLAR_NETWORK --source $PRIVATE_KEY --id $FACTORY_ID -- init --splitter_wasm_hash {{splitter_wasm_hash}}
-    echo "Factory initialized with WASM hash: {{splitter_wasm_hash}}"
+    stellar contract invoke --network $STELLAR_NETWORK --source $PRIVATE_KEY --id $FACTORY_ID -- init --splitter_wasm_hash {{ splitter_wasm_hash }}
+    echo "Factory initialized with WASM hash: {{ splitter_wasm_hash }}"
 
 # Create splitter using factory (uses .env for configuration)
 create-splitter factory_id recipients shares:
@@ -35,8 +43,8 @@ create-splitter factory_id recipients shares:
     stellar contract invoke \
         --network $STELLAR_NETWORK \
         --source $PRIVATE_KEY \
-        --id {{factory_id}} \
+        --id {{ factory_id }} \
         -- create \
         --token $PYUSD_SAC_CONTRACT \
-        --recipients {{recipients}} \
-        --shares {{shares}}
+        --recipients {{ recipients }} \
+        --shares {{ shares }}
