@@ -44,7 +44,6 @@ This project includes two smart contracts:
 │       ├── src/lib.rs            # Factory logic
 │       └── src/test.rs           # Factory tests
 ├── justfile                      # Deployment commands
-├── CLAUDE.md                     # Claude Code guidance
 └── README.md
 ```
 
