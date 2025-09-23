@@ -5,5 +5,12 @@ target
 .soroban
 .stellar
 
+# Environment files
+.env
+
 # Test snapshots (auto-generated)
 test_snapshots/
+
+# Local editor setup
+CLAUDE.md
+.vscode
