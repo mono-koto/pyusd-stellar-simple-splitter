@@ -34,8 +34,9 @@ This project includes two smart contracts:
 ## Deployed Contracts
 
 ### Testnet Factory
-- Contract ID: `CA4WV3U4KUNIWKGZA6CVLLH33HTJR63LSTTKWEX3SI24FKMHJ7G75LAP`
-- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CA4WV3U4KUNIWKGZA6CVLLH33HTJR63LSTTKWEX3SI24FKMHJ7G75LAP)
+- Contract ID: `CCMG34IA36G72YZEZBUEBTWLPG72QR6UGWYFJF332ECBWUMYDRBPWADP`
+- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CCMG34IA36G72YZEZBUEBTWLPG72QR6UGWYFJF332ECBWUMYDRBPWADP)
+
 
 ## Project Structure
 

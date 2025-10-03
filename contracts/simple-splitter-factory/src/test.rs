@@ -1,7 +1,18 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{testutils::Address as _, vec, Address, Env};
+use simple_splitter::SimpleSplitterClient;
+use soroban_sdk::{
+    testutils::{Address as _, Events, Ledger},
+    vec, Address, Env,
+};
+
+// Import optimized SimpleSplitter WASM
+mod simple_splitter_wasm {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32-unknown-unknown/release/simple_splitter.optimized.wasm"
+    );
+}
 
 fn setup_test_env() -> Env {
     let env = Env::default();
@@ -19,6 +30,12 @@ fn create_dummy_wasm_hash(env: &Env) -> BytesN<32> {
     // For testing purposes, create a dummy hash
     let dummy_bytes = soroban_sdk::Bytes::from_slice(env, b"dummy_wasm");
     env.crypto().sha256(&dummy_bytes).into()
+}
+
+fn get_splitter_wasm_hash(env: &Env) -> BytesN<32> {
+    // Upload the optimized SimpleSplitter WASM and get its hash
+    env.deployer()
+        .upload_contract_wasm(simple_splitter_wasm::WASM)
 }
 
 fn create_token(env: &Env) -> Address {
@@ -53,4 +70,154 @@ fn test_create_without_init() {
         &vec![&env, alice.clone(), bob.clone()],
         &vec![&env, 1, 1],
     );
+}
+
+#[test]
+fn test_create_splitter_success() {
+    let env = setup_test_env();
+    let (_factory_id, factory) = create_factory(&env);
+    let token = create_token(&env);
+
+    // Get SimpleSplitter WASM hash
+    let splitter_wasm_hash = get_splitter_wasm_hash(&env);
+
+    // Initialize factory with the SimpleSplitter WASM hash
+    factory.init(&splitter_wasm_hash);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    // Create a new splitter
+    let splitter_address = factory.create(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1, 1],
+    );
+
+    // Verify the splitter contract was deployed and initialized correctly
+    let splitter_client = SimpleSplitterClient::new(&env, &splitter_address);
+    let (config_token, config_recipients, config_shares) = splitter_client.get_config();
+
+    assert_eq!(config_token, token);
+    assert_eq!(config_recipients.len(), 2);
+    assert_eq!(config_recipients.get(0).unwrap(), alice);
+    assert_eq!(config_recipients.get(1).unwrap(), bob);
+    assert_eq!(config_shares.len(), 2);
+    assert_eq!(config_shares.get(0).unwrap(), 1);
+    assert_eq!(config_shares.get(1).unwrap(), 1);
+}
+
+#[test]
+fn test_create_multiple_splitters() {
+    let env = setup_test_env();
+    let (_factory_id, factory) = create_factory(&env);
+    let token = create_token(&env);
+
+    // Get SimpleSplitter WASM hash
+    let splitter_wasm_hash = get_splitter_wasm_hash(&env);
+
+    // Initialize factory
+    factory.init(&splitter_wasm_hash);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+    let charlie = Address::generate(&env);
+
+    // Create first splitter
+    let splitter1 = factory.create(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1, 1],
+    );
+
+    // Advance ledger to get different salt
+    env.ledger().set_sequence_number(env.ledger().sequence() + 1);
+    env.ledger().set_timestamp(env.ledger().timestamp() + 5);
+
+    // Create second splitter with same parameters - should get different address
+    let splitter2 = factory.create(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1, 1],
+    );
+
+    // Advance ledger again
+    env.ledger().set_sequence_number(env.ledger().sequence() + 1);
+    env.ledger().set_timestamp(env.ledger().timestamp() + 5);
+
+    // Create third splitter with different parameters
+    let splitter3 = factory.create(
+        &token,
+        &vec![&env, alice.clone(), bob.clone(), charlie.clone()],
+        &vec![&env, 1, 2, 3],
+    );
+
+    // Verify all addresses are unique
+    assert_ne!(splitter1, splitter2);
+    assert_ne!(splitter1, splitter3);
+    assert_ne!(splitter2, splitter3);
+
+    // Verify third splitter has correct config
+    let splitter3_client = SimpleSplitterClient::new(&env, &splitter3);
+    let (_, config_recipients, config_shares) = splitter3_client.get_config();
+    assert_eq!(config_recipients.len(), 3);
+    assert_eq!(config_shares.get(0).unwrap(), 1);
+    assert_eq!(config_shares.get(1).unwrap(), 2);
+    assert_eq!(config_shares.get(2).unwrap(), 3);
+}
+
+#[test]
+fn test_create_emits_event() {
+    let env = setup_test_env();
+    let (_factory_id, factory) = create_factory(&env);
+    let token = create_token(&env);
+
+    // Get SimpleSplitter WASM hash
+    let splitter_wasm_hash = get_splitter_wasm_hash(&env);
+
+    // Initialize factory
+    factory.init(&splitter_wasm_hash);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    // Create a new splitter
+    let _splitter_address = factory.create(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1, 1],
+    );
+
+    // Verify event was emitted - just check that events exist
+    let events = env.events().all();
+    assert!(events.len() > 0, "Expected events to be emitted");
+}
+
+#[test]
+fn test_create_single_recipient() {
+    let env = setup_test_env();
+    let (_factory_id, factory) = create_factory(&env);
+    let token = create_token(&env);
+
+    // Get SimpleSplitter WASM hash
+    let splitter_wasm_hash = get_splitter_wasm_hash(&env);
+
+    // Initialize factory
+    factory.init(&splitter_wasm_hash);
+
+    let alice = Address::generate(&env);
+
+    // Create a splitter with single recipient
+    let splitter_address = factory.create(
+        &token,
+        &vec![&env, alice.clone()],
+        &vec![&env, 100],
+    );
+
+    // Verify configuration
+    let splitter_client = SimpleSplitterClient::new(&env, &splitter_address);
+    let (_, config_recipients, config_shares) = splitter_client.get_config();
+    assert_eq!(config_recipients.len(), 1);
+    assert_eq!(config_recipients.get(0).unwrap(), alice);
+    assert_eq!(config_shares.get(0).unwrap(), 100);
 }

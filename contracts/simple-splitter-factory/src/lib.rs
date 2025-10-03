@@ -44,8 +44,14 @@ impl SimpleSplitterFactory {
             .get(&WASM_HASH)
             .expect("Factory not initialized with WASM hash");
 
-        // Deploy the contract
-        let salt = env.crypto().sha256(&token.clone().to_xdr(&env));
+        // Deploy the contract with a pseudo-random salt based on ledger and nonce
+        // This allows multiple splitters with the same configuration
+        // Combine ledger sequence with current ledger timestamp for more entropy
+        let mut salt_data = soroban_sdk::Bytes::new(&env);
+        salt_data.append(&env.ledger().sequence().to_xdr(&env));
+        salt_data.append(&env.ledger().timestamp().to_xdr(&env));
+        let salt = env.crypto().sha256(&salt_data);
+
         let contract_id = env
             .deployer()
             .with_current_contract(salt)
