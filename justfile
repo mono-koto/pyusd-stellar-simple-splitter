@@ -18,12 +18,12 @@ fmt:
 
 check: build test clippy fmt
 
-# Deploy splitter contract (uses .env for network and private key)
-deploy-splitter:
+# Upload splitter WASM to network and return hash (uses .env for network and private key)
+upload-splitter:
     #!/bin/bash
     set -a && source .env && set +a
-    echo "Deploying SimpleSplitter to $STELLAR_NETWORK..."
-    stellar contract deploy --network $STELLAR_NETWORK --source $PRIVATE_KEY --wasm target/wasm32-unknown-unknown/release/simple_splitter.optimized.wasm
+    echo "Uploading SimpleSplitter WASM to $STELLAR_NETWORK..."
+    stellar contract upload --network $STELLAR_NETWORK --source $PRIVATE_KEY --wasm target/wasm32-unknown-unknown/release/simple_splitter.optimized.wasm
 
 # Deploy factory contract (uses .env for network and private key)
 deploy-factory splitter_wasm_hash:

@@ -10,7 +10,7 @@ doctest = false
 
 [dependencies]
 soroban-sdk = { workspace = true }
-simple-splitter = { path = "../simple-splitter" }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
+simple-splitter = { path = "../simple-splitter" }

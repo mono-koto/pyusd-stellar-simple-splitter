@@ -79,10 +79,10 @@ just test
 
 ### 4. Deploy to Testnet
 
-First, deploy the SimpleSplitter contract:
+First, upload the SimpleSplitter WASM and get its hash:
 
 ```bash
-just deploy-splitter
+just upload-splitter
 ```
 
 This returns a WASM hash. Use it to deploy and initialize the factory:

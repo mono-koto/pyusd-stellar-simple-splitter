@@ -1,13 +1,19 @@
 #![no_std]
 
-use simple_splitter::SimpleSplitterClient;
 use soroban_sdk::{
-    contract, contractimpl, symbol_short, xdr::ToXdr, Address, BytesN, Env, Symbol, Vec,
+    contract, contractimpl, contractclient, symbol_short, xdr::ToXdr, Address, BytesN, Env,
+    Symbol, Vec,
 };
 
 mod test;
 
 const WASM_HASH: Symbol = symbol_short!("wasm");
+
+// Define the SimpleSplitter client interface
+#[contractclient(name = "SimpleSplitterClient")]
+pub trait SimpleSplitterTrait {
+    fn init(env: Env, token: Address, recipients: Vec<Address>, shares: Vec<u32>);
+}
 
 #[contract]
 pub struct SimpleSplitterFactory;
