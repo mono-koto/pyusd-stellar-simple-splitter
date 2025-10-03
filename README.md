@@ -1,29 +1,28 @@
 # PYUSD Simple Splitter on Stellar
 
-A demonstration of PYUSD token splitting on Stellar using Soroban smart contracts. This project shows how to automatically distribute PYUSD tokens among multiple recipients based on predefined share ratios.
+A demonstration of [PYUSD](https://paxos.com/pyusd/) token splitting on [Stellar](https://stellar.org) using [Soroban](https://soroban.stellar.org) smart contracts. This project shows how to automatically distribute PYUSD tokens among multiple recipients based on predefined share ratios.
 
 ## Overview
 
 This project includes two smart contracts:
 
-1. **SimpleSplitter** - Core contract that splits PYUSD tokens proportionally among recipients
-2. **SimpleSplitterFactory** - Factory contract for easily deploying new splitter instances
+1. SimpleSplitter - Core contract that splits PYUSD tokens proportionally among recipients
+2. SimpleSplitterFactory - Factory contract for deploying new splitter instances
 
 ### Notes
 
-- **Immutable Configuration**: Recipients and shares are set at initialization and cannot be changed
-- **Gas-Efficient**: Uses proportional math to minimize computation costs
-- **Factory Pattern**: Enables easy deployment of multiple splitter instances
-- **Event-Driven**: Factory emits events for off-chain tracking
-
+- Recipients and shares are set at initialization and cannot be changed
+- Uses proportional math to minimize computation costs
+- Factory pattern enables deployment of multiple splitter instances
+- Factory emits events for off-chain tracking
 
 ## Features
 
-- **Proportional Distribution**: Automatically split tokens based on customizable share ratios
-- **Factory Pattern**: Deploy new splitters easily through the factory contract
-- **PYUSD Integration**: Works specifically with PYUSD on Stellar testnet and mainnet
-- **Event Emission**: Factory emits events for tracking deployed splitters
-- **Integer Math**: Handles rounding with remainder staying in contract
+- Proportional distribution based on customizable share ratios
+- Factory pattern for easy splitter deployment
+- Works with PYUSD on Stellar testnet and mainnet
+- Event emission for tracking deployed splitters
+- Integer math with remainder staying in contract
 
 ## PYUSD on Stellar
 
@@ -31,6 +30,12 @@ This project includes two smart contracts:
 | ------- | ---------------------------------------------------------------- | ---------------------------------------------------------- |
 | Testnet | `PYUSD:GBT2KJDKUZYZTQPCSR57VZT5NJHI4H7FOB5LT5FPRWSR7I5B4FS3UU7G` | `CACZL3MGXXP3O6ROMB4Q36ROFULRWD6QARPE3AKWPSWMYZVF2474CBXP` |
 | Mainnet | `PYUSD:GDQE7IXJ4HUHV6RQHIUPRJSEZE4DRS5WY577O2FY6YQ5LVWZ7JZTU2V5` | `CAKBVGHJIK2HPP5JPT2UOP27O2IMKIUUCFGP3LOOMGCZLE3NP73Z44H6` |
+
+## Deployed Contracts
+
+### Testnet Factory
+- Contract ID: `CA4WV3U4KUNIWKGZA6CVLLH33HTJR63LSTTKWEX3SI24FKMHJ7G75LAP`
+- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CA4WV3U4KUNIWKGZA6CVLLH33HTJR63LSTTKWEX3SI24FKMHJ7G75LAP)
 
 ## Project Structure
 
@@ -52,7 +57,9 @@ This project includes two smart contracts:
 - **Rust** with `wasm32-unknown-unknown` target
 - **Stellar CLI** - [Installation guide](https://developers.stellar.org/docs/tools/cli/install-cli)
 - **Just** command runner - `cargo install just`
-- A Stellar wallet with XLM for transaction fees
+- A Stellar wallet with XLM for transaction fees and testnet PYUSD
+
+> **Note:** See [pyusd-stellar-recipes](https://github.com/mono-koto/pyusd-stellar-recipes) for instructions on setting up a local wallet, getting testnet XLM, and obtaining testnet PYUSD.
 
 ## Quick Start
 
