@@ -14,3 +14,8 @@ test_snapshots/
 # Local editor setup
 CLAUDE.md
 .vscode
+
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.env

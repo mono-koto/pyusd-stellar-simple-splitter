@@ -34,8 +34,21 @@ This project includes two smart contracts:
 ## Deployed Contracts
 
 ### Testnet Factory
-- Contract ID: `CA4WV3U4KUNIWKGZA6CVLLH33HTJR63LSTTKWEX3SI24FKMHJ7G75LAP`
-- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CA4WV3U4KUNIWKGZA6CVLLH33HTJR63LSTTKWEX3SI24FKMHJ7G75LAP)
+- Contract ID: `CDEZK2VRDO23VS5WCKDFQUNWETHYCZB3VP6GXWOZX5TH7XCASCCYFDIA`
+- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CDEZK2VRDO23VS5WCKDFQUNWETHYCZB3VP6GXWOZX5TH7XCASCCYFDIA)
+
+## Web Interface
+
+A user-friendly web interface is available for creating and managing splitters:
+
+🌐 **[Live Demo](https://mono-koto.github.io/pyusd-stellar-simple-splitter/)** (Testnet only)
+
+Features:
+- Connect wallet using Stellar Wallets Kit (Freighter, xBull, Albedo, etc.)
+- Create new splitters with custom recipients and share ratios
+- View splitter details including balance and recipient allocations
+- Distribute PYUSD to recipients with one click
+- Links to Stellar Expert for detailed contract and account information
 
 ## Project Structure
 
@@ -48,6 +61,13 @@ This project includes two smart contracts:
 │   └── simple-splitter-factory/  # Factory contract
 │       ├── src/lib.rs            # Factory logic
 │       └── src/test.rs           # Factory tests
+├── frontend/                     # Web interface
+│   ├── src/
+│   │   ├── components/           # React components
+│   │   ├── contexts/             # Wallet context
+│   │   ├── lib/                  # Contract utilities
+│   │   └── config.ts             # Network configuration
+│   └── package.json
 ├── justfile                      # Deployment commands
 └── README.md
 ```
@@ -147,12 +167,32 @@ To get testnet PYUSD for testing:
 
 ## Development
 
+### Smart Contracts
+
 ```bash
-cargo fmt        
-cargo clippy     
+cargo fmt
+cargo clippy
 cargo test
 cargo build --release
 ```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev      # Start development server
+npm run build    # Build for production
+```
+
+The frontend is built with:
+- **Vite + React + TypeScript** - Modern build tooling and type safety
+- **Tailwind CSS + ShadCN** - Styling and UI components
+- **@creit.tech/stellar-wallets-kit** - Multi-wallet support (Freighter, xBull, Albedo, etc.)
+- **@stellar/stellar-sdk** - Stellar/Soroban contract interactions
+- **TanStack Query** - Async state management
+- **Wouter** - Lightweight routing
+- **Sonner** - Toast notifications
 
 
 ## License
