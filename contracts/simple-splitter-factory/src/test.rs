@@ -219,12 +219,8 @@ fn test_create_single_recipient() {
     let salt = create_salt(&env, b"single_recipient");
 
     // Create a splitter with single recipient
-    let splitter_address = factory.create(
-        &salt,
-        &token,
-        &vec![&env, alice.clone()],
-        &vec![&env, 100],
-    );
+    let splitter_address =
+        factory.create(&salt, &token, &vec![&env, alice.clone()], &vec![&env, 100]);
 
     // Verify configuration
     let splitter_client = SimpleSplitterClient::new(&env, &splitter_address);

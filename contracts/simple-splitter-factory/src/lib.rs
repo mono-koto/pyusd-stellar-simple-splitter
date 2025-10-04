@@ -1,8 +1,7 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contractclient, symbol_short, Address, BytesN, Env,
-    Symbol, Vec,
+    contract, contractclient, contractimpl, symbol_short, Address, BytesN, Env, Symbol, Vec,
 };
 
 mod test;
