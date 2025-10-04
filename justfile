@@ -45,6 +45,7 @@ create-splitter factory_id recipients shares:
         --source $PRIVATE_KEY \
         --id {{ factory_id }} \
         -- create \
+        --salt $(openssl rand -hex 32) \
         --token $PYUSD_SAC_CONTRACT \
-        --recipients {{ recipients }} \
-        --shares {{ shares }}
+        --recipients '{{ recipients }}' \
+        --shares '{{ shares }}'

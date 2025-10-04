@@ -1,7 +1,7 @@
 #![no_std]
 
 use soroban_sdk::{
-    contract, contractimpl, contractclient, symbol_short, xdr::ToXdr, Address, BytesN, Env,
+    contract, contractimpl, contractclient, symbol_short, Address, BytesN, Env,
     Symbol, Vec,
 };
 
@@ -32,8 +32,11 @@ impl SimpleSplitterFactory {
 
     /// Create a new SimpleSplitter contract with the given parameters.
     /// Returns the address of the newly deployed contract.
+    /// The salt parameter allows creating multiple splitters with the same configuration
+    /// while remaining deterministic for simulation.
     pub fn create(
         env: Env,
+        salt: BytesN<32>,
         token: Address,
         recipients: soroban_sdk::Vec<Address>,
         shares: soroban_sdk::Vec<u32>,
@@ -43,14 +46,6 @@ impl SimpleSplitterFactory {
             .instance()
             .get(&WASM_HASH)
             .expect("Factory not initialized with WASM hash");
-
-        // Deploy the contract with a pseudo-random salt based on ledger and nonce
-        // This allows multiple splitters with the same configuration
-        // Combine ledger sequence with current ledger timestamp for more entropy
-        let mut salt_data = soroban_sdk::Bytes::new(&env);
-        salt_data.append(&env.ledger().sequence().to_xdr(&env));
-        salt_data.append(&env.ledger().timestamp().to_xdr(&env));
-        let salt = env.crypto().sha256(&salt_data);
 
         let contract_id = env
             .deployer()
@@ -63,7 +58,7 @@ impl SimpleSplitterFactory {
 
         // Emit event for better observability
         env.events()
-            .publish((symbol_short!("created"),), contract_id.clone());
+            .publish((symbol_short!("created"),), &contract_id);
 
         contract_id
     }

@@ -3,7 +3,7 @@
 use super::*;
 use simple_splitter::SimpleSplitterClient;
 use soroban_sdk::{
-    testutils::{Address as _, Events, Ledger},
+    testutils::{Address as _, Events},
     vec, Address, Env,
 };
 
@@ -30,6 +30,11 @@ fn create_dummy_wasm_hash(env: &Env) -> BytesN<32> {
     // For testing purposes, create a dummy hash
     let dummy_bytes = soroban_sdk::Bytes::from_slice(env, b"dummy_wasm");
     env.crypto().sha256(&dummy_bytes).into()
+}
+
+fn create_salt(env: &Env, seed: &[u8]) -> BytesN<32> {
+    let bytes = soroban_sdk::Bytes::from_slice(env, seed);
+    env.crypto().sha256(&bytes).into()
 }
 
 fn get_splitter_wasm_hash(env: &Env) -> BytesN<32> {
@@ -64,8 +69,11 @@ fn test_create_without_init() {
     let alice = Address::generate(&env);
     let bob = Address::generate(&env);
 
+    let salt = create_salt(&env, b"test_salt");
+
     // This should panic because factory wasn't initialized
     factory.create(
+        &salt,
         &token,
         &vec![&env, alice.clone(), bob.clone()],
         &vec![&env, 1, 1],
@@ -86,9 +94,11 @@ fn test_create_splitter_success() {
 
     let alice = Address::generate(&env);
     let bob = Address::generate(&env);
+    let salt = create_salt(&env, b"test_salt_1");
 
     // Create a new splitter
     let splitter_address = factory.create(
+        &salt,
         &token,
         &vec![&env, alice.clone(), bob.clone()],
         &vec![&env, 1, 1],
@@ -124,29 +134,27 @@ fn test_create_multiple_splitters() {
     let charlie = Address::generate(&env);
 
     // Create first splitter
+    let salt1 = create_salt(&env, b"splitter_1");
     let splitter1 = factory.create(
+        &salt1,
         &token,
         &vec![&env, alice.clone(), bob.clone()],
         &vec![&env, 1, 1],
     );
 
-    // Advance ledger to get different salt
-    env.ledger().set_sequence_number(env.ledger().sequence() + 1);
-    env.ledger().set_timestamp(env.ledger().timestamp() + 5);
-
-    // Create second splitter with same parameters - should get different address
+    // Create second splitter with same parameters but different salt - should get different address
+    let salt2 = create_salt(&env, b"splitter_2");
     let splitter2 = factory.create(
+        &salt2,
         &token,
         &vec![&env, alice.clone(), bob.clone()],
         &vec![&env, 1, 1],
     );
-
-    // Advance ledger again
-    env.ledger().set_sequence_number(env.ledger().sequence() + 1);
-    env.ledger().set_timestamp(env.ledger().timestamp() + 5);
 
     // Create third splitter with different parameters
+    let salt3 = create_salt(&env, b"splitter_3");
     let splitter3 = factory.create(
+        &salt3,
         &token,
         &vec![&env, alice.clone(), bob.clone(), charlie.clone()],
         &vec![&env, 1, 2, 3],
@@ -180,9 +188,11 @@ fn test_create_emits_event() {
 
     let alice = Address::generate(&env);
     let bob = Address::generate(&env);
+    let salt = create_salt(&env, b"event_test");
 
     // Create a new splitter
     let _splitter_address = factory.create(
+        &salt,
         &token,
         &vec![&env, alice.clone(), bob.clone()],
         &vec![&env, 1, 1],
@@ -206,9 +216,11 @@ fn test_create_single_recipient() {
     factory.init(&splitter_wasm_hash);
 
     let alice = Address::generate(&env);
+    let salt = create_salt(&env, b"single_recipient");
 
     // Create a splitter with single recipient
     let splitter_address = factory.create(
+        &salt,
         &token,
         &vec![&env, alice.clone()],
         &vec![&env, 100],
