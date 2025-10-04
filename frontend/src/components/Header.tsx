@@ -2,6 +2,9 @@ import { useLocation } from 'wouter';
 import { useWallet } from '@/contexts/wallet-context';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Copy } from 'lucide-react';
+import { toast } from 'sonner';
+import { EXPLORER_URL } from '@/config';
 
 export function Header() {
   const [, setLocation] = useLocation();
@@ -15,9 +18,6 @@ export function Header() {
     }
   };
 
-  const truncateAddress = (addr: string) => {
-    return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
-  };
 
   return (
     <header className="border-b">
@@ -36,7 +36,25 @@ export function Header() {
         <div>
           {isConnected && address ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">{truncateAddress(address)}</span>
+              <div className="inline-flex items-center gap-1">
+                <a
+                  href={`${EXPLORER_URL}/account/${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-muted-foreground hover:underline"
+                >
+                  {address.slice(0, 4)}...{address.slice(-4)}
+                </a>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(address);
+                    toast.success('Address copied to clipboard');
+                  }}
+                  className="hover:opacity-70 cursor-pointer"
+                >
+                  <Copy className="h-3 w-3" />
+                </button>
+              </div>
               <Button variant="outline" size="sm" onClick={disconnect}>
                 Disconnect
               </Button>

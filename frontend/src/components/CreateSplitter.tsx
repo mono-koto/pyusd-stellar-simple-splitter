@@ -18,8 +18,8 @@ export function CreateSplitter() {
   const { kit, address, isConnected } = useWallet();
   const [, setLocation] = useLocation();
   const [recipients, setRecipients] = useState<RecipientShare[]>([
-    { address: '', share: '' },
-    { address: '', share: '' },
+    { address: '', share: '50' },
+    { address: '', share: '50' },
   ]);
 
   const createMutation = useMutation({
