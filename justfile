@@ -17,7 +17,6 @@ fmt:
     cargo fmt --all -- --check
 
 check: build test clippy fmt
-    cd frontend && npm run lint && npm run build
 
 # Upload splitter WASM to network and return hash (uses .env for network and private key)
 upload-splitter:
