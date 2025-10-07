@@ -34,8 +34,8 @@ This project includes two smart contracts:
 ## Deployed Contracts
 
 ### Testnet Factory
-- Contract ID: `CA6BN2HYVKCNQAFBFOJ3AFBDR3NTD53MC34YRV4EHODS4ZHYCJQYR4A2`
-- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CA6BN2HYVKCNQAFBFOJ3AFBDR3NTD53MC34YRV4EHODS4ZHYCJQYR4A2)
+- Contract ID: `CANG56EMKRP65Y7AIWU6XA4LGUIMLSY7TT4TOYVJMHMGISGYDJF5R56Z`
+- [View on Stellar Expert](https://stellar.expert/explorer/testnet/contract/CANG56EMKRP65Y7AIWU6XA4LGUIMLSY7TT4TOYVJMHMGISGYDJF5R56Z)
 
 ## Web Interface
 
