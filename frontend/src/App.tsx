@@ -1,4 +1,5 @@
-import { Route, Router, useHashLocation } from 'wouter';
+import { Route, Router } from 'wouter';
+import { useHashLocation } from 'wouter/use-hash-location';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { WalletProvider } from '@/contexts/WalletProvider';
