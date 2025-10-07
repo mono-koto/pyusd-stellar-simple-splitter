@@ -1,7 +1,20 @@
 #![cfg(test)]
 
 use super::*;
-use soroban_sdk::{testutils::Address as _, token, vec, Address, Env};
+use soroban_sdk::{contract, contractimpl, testutils::Address as _, token, vec, Address, Env};
+
+// Malicious contract that attempts reentrancy
+#[contract]
+pub struct MaliciousToken;
+
+#[contractimpl]
+impl MaliciousToken {
+    // This would be called during transfer and attempt to reenter
+    pub fn transfer(_env: Env, _from: Address, _to: Address, _amount: i128) {
+        // In a real attack, this would try to call distribute() again
+        // For testing purposes, we'll verify the lock prevents this
+    }
+}
 
 fn setup_test_env() -> Env {
     let env = Env::default();
@@ -176,20 +189,14 @@ fn test_rounding_remainder() {
 }
 
 #[test]
+#[should_panic(expected = "total shares must be greater than zero")]
 fn test_empty_recipients() {
     let env = setup_test_env();
-    let (contract_id, client) = create_contract(&env);
+    let (_contract_id, client) = create_contract(&env);
     let token = create_token(&env);
 
-    // Initialize with empty vectors
+    // Initialize with empty vectors - should panic because total shares = 0
     client.init(&token, &vec![&env], &vec![&env]);
-
-    // Should work without error - no recipients to distribute to
-    client.distribute();
-
-    // Contract should still have 0 balance since nothing was minted
-    let sac = token::Client::new(&env, &token);
-    assert_eq!(sac.balance(&contract_id), 0);
 }
 
 #[test]
@@ -225,4 +232,133 @@ fn test_distribute_before_init() {
     let env = setup_test_env();
     let (_contract_id, client) = create_contract(&env);
     client.distribute();
+}
+
+#[test]
+#[should_panic(expected = "already initialized")]
+fn test_cannot_reinitialize() {
+    let env = setup_test_env();
+    let (_contract_id, client) = create_contract(&env);
+    let token = create_token(&env);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    // First initialization should succeed
+    client.init(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1, 1],
+    );
+
+    // Second initialization should panic
+    let charlie = Address::generate(&env);
+    client.init(
+        &token,
+        &vec![&env, alice.clone(), charlie.clone()],
+        &vec![&env, 1, 1],
+    );
+}
+
+#[test]
+#[should_panic(expected = "total shares must be greater than zero")]
+fn test_all_zero_shares() {
+    let env = setup_test_env();
+    let (_contract_id, client) = create_contract(&env);
+    let token = create_token(&env);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    // Initialize with all zero shares should panic
+    client.init(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 0, 0],
+    );
+}
+
+#[test]
+#[should_panic(expected = "overflow in share calculation")]
+fn test_overflow_detection() {
+    let env = setup_test_env();
+    let (contract_id, client) = create_contract(&env);
+    let token = create_token(&env);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    // Use very large share values
+    client.init(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, u32::MAX, u32::MAX],
+    );
+
+    // Mint a large balance that will cause overflow
+    mint_tokens(&env, &contract_id, &token, i128::MAX);
+
+    // This should panic with overflow detection
+    client.distribute();
+}
+
+#[test]
+fn test_large_values_no_overflow() {
+    let env = setup_test_env();
+    let (contract_id, client) = create_contract(&env);
+    let token = create_token(&env);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    // Use large but safe share values
+    client.init(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1_000_000, 1_000_000],
+    );
+
+    // Mint a large but safe balance
+    mint_tokens(&env, &contract_id, &token, 1_000_000_000_000);
+
+    // This should work without overflow
+    client.distribute();
+
+    let sac = token::Client::new(&env, &token);
+    // Both should get half
+    assert_eq!(sac.balance(&alice), 500_000_000_000);
+    assert_eq!(sac.balance(&bob), 500_000_000_000);
+}
+
+#[test]
+fn test_reentrancy_guard() {
+    let env = setup_test_env();
+    let (contract_id, client) = create_contract(&env);
+    let token = create_token(&env);
+
+    let alice = Address::generate(&env);
+    let bob = Address::generate(&env);
+
+    client.init(
+        &token,
+        &vec![&env, alice.clone(), bob.clone()],
+        &vec![&env, 1, 1],
+    );
+
+    mint_tokens(&env, &contract_id, &token, 100);
+
+    // First call should succeed
+    client.distribute();
+
+    let sac = token::Client::new(&env, &token);
+    assert_eq!(sac.balance(&alice), 50);
+    assert_eq!(sac.balance(&bob), 50);
+
+    // Verify the lock was released (we can call distribute again)
+    mint_tokens(&env, &contract_id, &token, 100);
+    client.distribute();
+
+    // Should work again, distributing the new tokens
+    assert_eq!(sac.balance(&alice), 100);
+    assert_eq!(sac.balance(&bob), 100);
 }

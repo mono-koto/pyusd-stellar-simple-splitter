@@ -7,6 +7,7 @@ use soroban_sdk::{
 mod test;
 
 const WASM_HASH: Symbol = symbol_short!("wasm");
+const ONE_YEAR_LEDGERS: u32 = 5_184_000;
 
 // Define the SimpleSplitter client interface
 #[contractclient(name = "SimpleSplitterClient")]
@@ -23,10 +24,20 @@ impl SimpleSplitterFactory {
     /// Initialize the factory with the SimpleSplitter WASM hash.
     /// This should be called once after deploying the factory.
     pub fn init(env: Env, splitter_wasm_hash: BytesN<32>) {
+        // Prevent reinitialization
+        if env.storage().instance().has(&symbol_short!("initd")) {
+            panic!("already initialized");
+        }
+
+        // Mark as initialized
+        env.storage().instance().set(&symbol_short!("initd"), &true);
+
         env.storage()
             .instance()
             .set(&WASM_HASH, &splitter_wasm_hash);
-        env.storage().instance().extend_ttl(5000, 5000);
+        env.storage()
+            .instance()
+            .extend_ttl(ONE_YEAR_LEDGERS, ONE_YEAR_LEDGERS);
     }
 
     /// Create a new SimpleSplitter contract with the given parameters.
@@ -58,6 +69,11 @@ impl SimpleSplitterFactory {
         // Emit event for better observability
         env.events()
             .publish((symbol_short!("created"),), &contract_id);
+
+        // Extend TTL to keep factory alive
+        env.storage()
+            .instance()
+            .extend_ttl(ONE_YEAR_LEDGERS, ONE_YEAR_LEDGERS);
 
         contract_id
     }

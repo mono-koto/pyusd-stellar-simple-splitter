@@ -200,7 +200,7 @@ fn test_create_emits_event() {
 
     // Verify event was emitted - just check that events exist
     let events = env.events().all();
-    assert!(events.len() > 0, "Expected events to be emitted");
+    assert!(!events.is_empty(), "Expected events to be emitted");
 }
 
 #[test]
@@ -228,4 +228,19 @@ fn test_create_single_recipient() {
     assert_eq!(config_recipients.len(), 1);
     assert_eq!(config_recipients.get(0).unwrap(), alice);
     assert_eq!(config_shares.get(0).unwrap(), 100);
+}
+
+#[test]
+#[should_panic(expected = "already initialized")]
+fn test_cannot_reinitialize_factory() {
+    let env = setup_test_env();
+    let (_factory_id, factory) = create_factory(&env);
+    let wasm_hash = create_dummy_wasm_hash(&env);
+
+    // First initialization should succeed
+    factory.init(&wasm_hash);
+
+    // Second initialization should panic
+    let another_hash = create_dummy_wasm_hash(&env);
+    factory.init(&another_hash);
 }
