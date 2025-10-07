@@ -2,9 +2,9 @@
 
 # Build contracts
 build:
-    cargo build --release --target wasm32-unknown-unknown
-    stellar contract optimize --wasm target/wasm32-unknown-unknown/release/simple_splitter.wasm
-    stellar contract optimize --wasm target/wasm32-unknown-unknown/release/simple_splitter_factory.wasm
+    cargo build --release --target wasm32v1-none
+    stellar contract optimize --wasm target/wasm32v1-none/release/simple_splitter.wasm
+    stellar contract optimize --wasm target/wasm32v1-none/release/simple_splitter_factory.wasm
 
 # Test contracts
 test:
@@ -45,7 +45,7 @@ create-splitter factory_id recipients shares:
         --source $PRIVATE_KEY \
         --id {{ factory_id }} \
         -- create \
-        --salt $(openssl rand -hex 32) \
+        --salt $(openssl rand -hex 32) \cargo run --from-crate
         --token $PYUSD_SAC_CONTRACT \
         --recipients '{{ recipients }}' \
         --shares '{{ shares }}'
